@@ -1,0 +1,27 @@
+.wrapper{
+	margin: 20px;
+
+}
+
+
+#calendar{
+	width: 600px;
+	margin: 0 auto;
+}
+
+
+.modal-header{
+	border:0px; 
+	padding-bottom:0px
+}
+
+.modal-header .title{
+	font-size:2em; 
+	font-weight:900;
+}
+
+form.selectSession{
+	margin:0px auto; 
+	padding:0px;
+	width: 400px; 
+}
