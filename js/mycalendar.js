@@ -2,6 +2,8 @@ if (!_ED_) {
 	var _ED_={TPL:{}};
 }
 _ED_.uid=1;
+_ED_.modifyMode=false;
+_ED_.modifyEid=0;
 _ED_.bizHours=[9,10,11,14,15,16,17];
 
 $(document).ready(function() {
@@ -39,6 +41,8 @@ $(document).ready(function() {
 
 			$('#calendar').fullCalendar({
 				theme: true,
+				eventStartEditable:false,
+				eventDurationEditable:false,
 				header: {
 					left: 'prev,next today',
 					center: 'title',
@@ -51,7 +55,6 @@ $(document).ready(function() {
 					// dow:[1,2,3,4]
 				},
 				defaultDate:_ED_.now,
-				editable: true,
 				eventLimit: true, // allow "more" link when too many events
 				events: _ED_.events,
 
@@ -75,20 +78,31 @@ $(document).ready(function() {
 
   		if(_ED_.uid!=''){//CAN ADD EVENTS
 			var availHours=fetchAvailHoursForADay(date.format('YYYY-M-D'),_ED_.bizHours);
-			var data={date:date.format("dddd, MMMM Do YYYY"),availHours:availHours};
+			var data={date:date.format("dddd, MMMM Do YYYY"),availHours:availHours, modifyMode:_ED_.modifyMode};
 			_ED_.reserve(data);
   		}
 	}
 
 	_ED_.eventClick=function(calEvent, jsEvent, view){	
+		// console.log(calEvent);
 		// console.log('Event: ' + calEvent.title);
   //       console.log('Coordinates: ' + jsEvent.pageX + ',' + jsEvent.pageY);
   //       console.log('Current view: ' + view.name); //month, agendaWeek, or agendaDay. 
   //       $(this).css('background-color', 'red');
 
-
   		if(_ED_.uid!=''){//CAN ENTER MODIFY MODE
-  			
+  			if(_ED_.modifyMode==true){//already in modify mode
+  				if(calEvent.eid==_ED_.modifyEid){//cancel the modify mode
+  					_ED_.modifyMode=!_ED_.modifyMode;
+	  				_ED_.modifyEid=0;
+  					$(this).removeClass('selected');
+  				}
+  			}
+  			else{//not yet in modify mode
+  				_ED_.modifyMode=!_ED_.modifyMode;
+  				_ED_.modifyEid=calEvent.eid;
+  				$(this).addClass('selected');	
+  			}
   		}
 	}
 
@@ -108,7 +122,7 @@ $(document).ready(function() {
 		//modify the db, and refrech calendar. 
 		var tempDate=new moment(dateStr, 'dddd, MMMM Do YYYY');
 		var date=tempDate.format('YYYY-M-D');
-		var queryStr='&uid='+_ED_.uid+'&date='+date+'&start='+fdata['start'];
+		var queryStr='&uid='+_ED_.uid+'&date='+date+'&start='+fdata['start']+'&modifyMode='+_ED_.modifyMode+'&modifyEid='+_ED_.modifyEid;
 		// console.log(queryStr);
 
 		if (!_ED_._SEARCH_) _ED_._SEARCH_ = {};
@@ -122,34 +136,42 @@ $(document).ready(function() {
 				_ED_.reserve(fdata);
 			}
 			else{
-				fdata['success'] = 'Your session has been reserved. Calendar refreshing...';
+				if(_ED_.modifyMode){
+					fdata['success'] = 'Your session has been rescheduled. Calendar refreshing...';
+				}
+				else{
+					fdata['success'] = 'Your session has been reserved. Calendar refreshing...';
+				}
 				_ED_.reserve(fdata);
 
 				setTimeout(function() { 
 					$('#ED_Modal').modal('hide');	
-					// $('#calendar').fullCalendar('destroy');
-					// _ED_.loadEvents();			
 
-					_ED_.events.push(data.newEvent);
-					$('#calendar').fullCalendar('renderEvent', data.newEvent, false); 				
-				}, 2000);	
+					if(_ED_.modifyMode){
+						// for (i=0; i<_ED_.events.length; i++) {
+						// 	if(_ED_.events[i].eid==_ED_.modifyEid){
+						// 		_ED_.events.splice(i,1);	
+						// 	}
+						// }
+						_ED_.modifyMode=false;
+						_ED_.modifyEid=0;
+						$('.selected').removeClass('selected');
+					}
+					// _ED_.events.push(data.newEvent);
+
+					// $('#calendar').fullCalendar('renderEvent', data.newEvent, false); 		
+
+					$('#calendar').fullCalendar('destroy');
+					_ED_.loadEvents();			
+				}, 1000);	
 			}
 
 			delete _ED_._SEARCH_['C_'+cd];
 		};
 		$.getScript('service/events/reserveEvent.php?callback=_ED_._SEARCH_.C_'+cd+queryStr,
-			function( data) {});	
+			function( data) {});
 	};
 
-	_ED_.modifySubmit=function(o){
-
-	};
-
-
-
-	_ED_.modifyEvent=function(o){
-		
-	};
 
 
 	

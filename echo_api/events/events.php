@@ -51,24 +51,30 @@ class Fetch_data {
 		}
 		
 		return json_encode(array('status'=>'SUCCESS','newEvent'=>$newEvent), JSON_UNESCAPED_UNICODE);
-	}	
+	}
 
 
-	function modify_event($uid,$start,$date) {
+	function modify_event($uid,$start,$date, $modifyEid) {
 		$tb_event="ed_event";
 		$time=date ("Y-m-d H:i:s", time());
 
-		$title="Session reserved";
+		$title="Session rescheduled";
 		$startStr=$date.' '.$start.':00:00';
 		$endStr=$date.' '.($start+1).':00:00';
 
-		$query="insert into $tb_event (uid,title,start,end,time) values ('$uid','$title','$startStr','$endStr','$time')";
-		$result=$this->db->insert_query($query);
-		if(!$result){
-			return json_encode(array('status'=>'FAIL','error'=>"insert into $tb_event failed.",'query'=>$query));
+		$query="update $tb_event set title='$title', start='$startStr', end='$endStr', time='$time' where eid='$modifyEid'";
+		$result_update=$this->db->update_query($query);
+		if(!$result_update){
+			return json_encode(array('status'=>'FAIL','error'=>"UPDATE $tb_event failed.",'query'=>$query));
+		}
+
+		$query= "SELECT * FROM $tb_event WHERE eid='$modifyEid'";
+		$newEvent = $this->db->select_query($query);
+		if(!$newEvent){
+			return json_encode(array('status'=>'FAIL','error'=>"no records selected on $tb_event",'query'=>$query));
 		}
 		
-		return json_encode(array('status'=>'SUCCESS'), JSON_UNESCAPED_UNICODE);
+		return json_encode(array('status'=>'SUCCESS','newEvent'=>$newEvent), JSON_UNESCAPED_UNICODE);
 	}
 
 }

@@ -25,3 +25,8 @@ form.selectSession{
 	padding:0px;
 	width: 400px; 
 }
+
+
+.selected{
+	background-color: blue;
+}

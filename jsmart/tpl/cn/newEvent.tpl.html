@@ -1,5 +1,5 @@
 <div class="modal-header">
-	<span class="title">Reserve a one-hour session</span>
+	<span class="title">{if $modifyMode}Modify your session{else}Reserve a one-hour session{/if}</span>
 	<button type="button" class="close" data-dismiss="modal">
 		<span aria-hidden="true">&times;</span>
 		<span class="sr-only">Close</span>
@@ -11,7 +11,7 @@
 	<form class="selectSession">
  	
 		<div class="form-group">
-		<label for="start">Session select:</label>
+		<label for="start">{if $modifyMode}Reschedule your session to{else}Session select{/if}:</label>
 		<select class="form-control" name="start" id="start">
 			{foreach $availHours as $i => $hour}
 			<option value="{$hour}">
