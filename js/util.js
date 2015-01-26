@@ -65,4 +65,8 @@ function fetchAvailHoursForADay(dateStr, bizHours){
 	return availHours;
 }
 
+function blHoldingDays(destinMoment,todayMoment, numDays){
+	return destinMoment.diff(todayMoment,'days')>=numDays; 
+}
+
 

@@ -2,6 +2,7 @@ if (!_ED_) {
 	var _ED_={TPL:{}};
 }
 _ED_.uid=1;
+_ED_.holdingDays=2;
 _ED_.modifyMode=false;
 _ED_.modifyEid=0;
 _ED_.bizHours=[9,10,11,14,15,16,17];
@@ -18,7 +19,6 @@ $(document).ready(function() {
 
 	_ED_.init=function(){
 		_ED_.loadEvents();
-		// console.log("in init()");
 	};
 
 	_ED_.loadEvents=function(){
@@ -29,7 +29,6 @@ $(document).ready(function() {
 		    jsonpCallback: '_ED_.loadCalendar'
 		});
 
-		return;
 	};
 
 	_ED_.loadCalendar=function(data){
@@ -71,6 +70,10 @@ $(document).ready(function() {
 	};
 
 	_ED_.dayClick=function(date, jsEvent, view){
+		var todayMoment=new moment(_ED_.now);
+		if(blHoldingDays(date,todayMoment,_ED_.holdingDays)==false){
+			return;
+		}
 		// console.log('Clicked on: ' + date.format());
   //       console.log('Coordinates: ' + jsEvent.pageX + ',' + jsEvent.pageY);
   //       console.log('Current view: ' + view.name); //month, agendaWeek, or agendaDay. 
@@ -99,6 +102,12 @@ $(document).ready(function() {
   				}
   			}
   			else{//not yet in modify mode
+  				var destinMoment=new moment(calEvent.start);
+				var todayMoment=new moment(_ED_.now);
+				if(blHoldingDays(destinMoment,todayMoment,_ED_.holdingDays)==false){
+					return;
+				}
+
   				_ED_.modifyMode=!_ED_.modifyMode;
   				_ED_.modifyEid=calEvent.eid;
   				$(this).addClass('selected');	
@@ -171,15 +180,6 @@ $(document).ready(function() {
 		$.getScript('service/events/reserveEvent.php?callback=_ED_._SEARCH_.C_'+cd+queryStr,
 			function( data) {});
 	};
-
-
-
-	
-
-
-
-
-
 
 		
 });
