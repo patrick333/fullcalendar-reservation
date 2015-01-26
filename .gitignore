@@ -4,3 +4,4 @@ not_used/
 
 
 templates_c/
+echo_api/inc/dbcfg.inc.php
